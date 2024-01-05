@@ -1,4 +1,4 @@
-FROM python:3.10-bullseye
+FROM python:3.10-bullseye as production
 RUN python -m pip install --upgrade pip
 WORKDIR /app
 
@@ -14,6 +14,12 @@ COPY queries queries
 COPY router router
 
 RUN python -m pip install -r requirements.txt
+EXPOSE 8000
+
+ENV CORS_HOST https://rent-a-driver1.gitlab.io/module3-project-gamma
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+ENV SIGNING_KEY=${SIGNING_KEY}
 
 # !! PORT env var needs to match with exposed port in caprover dashboard
 CMD uvicorn main:app --host 0.0.0.0 --port 80

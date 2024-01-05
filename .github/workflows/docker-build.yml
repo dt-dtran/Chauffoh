@@ -1,0 +1,43 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 14
+
+      - name: Build and Push Docker Image
+        run: |
+          echo "Building Docker image for frontend"
+          docker build -t dtdtran/chauffoh-frontend:latest -f ghi/Dockerfile .
+
+          echo "Building Docker image for backend"
+          docker build -t dtdtran/chauffoh-backend:latest -f api/Dockerfile \
+            --build-arg SIGNING_KEY="${{ secrets.SIGNING_KEY }}" \
+            --build-arg DATABASE_URL="${{ secrets.DATABASE_URL }}" .
+
+          echo "Logging in to Docker Hub"
+          echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+          echo "Pushing Docker images to Docker Hub"
+          docker push dtdtran/your-frontend-image:latest
+          docker push dtdtran/your-backend-image:latest
+
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Cleanup
+        run: docker system prune -af

@@ -25,8 +25,8 @@ api-unit-tests-job:
     - pip install -r requirements.txt
     - python -m pytest
   variables:
-    DATABASE_URL: postgresql://user:password@postgres/chauffoh_db
-    SIGNING_KEY: 17e4be22f7b30f783b8b7bb70dd44bf888fd7dfec30653395dc6b48472fb31a6
+    DATABASE_URL: ${DATABASE_URL}
+    SIGNING_KEY: ${SIGNING_KEY}
     CORS_HOST: http://localhost:3000
 
 # # Build API Image:
@@ -36,7 +36,6 @@ build-api-image:
   variables:
     GITLAB_IMAGE: ${CI_REGISTRY_IMAGE}/api
   before_script:
-    # $CI_JOB_TOKEN is variable automatically added by Gitlab: see https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#variables-reference
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token registry.gitlab.com --password-stdin
   script:
     - docker build --tag $GITLAB_IMAGE:latest ./api
@@ -44,21 +43,12 @@ build-api-image:
   only:
     - main
 
-
 # # Build the React/JavaScript front-end
 build-front-end-job:
   stage: build
   image: node:lts-bullseye
   needs:
     - lint-test-job
-  variables:
-    # If either of these variables is defined in the GitLab
-    # CI/CD variables, that value will override the value here.
-    # You need to substitute in your real values for
-    # GROUP_NAME, PROJECT_NAME, & WEBSERVICE_NAME below.
-    PUBLIC_URL: https://rent-a-driver1.gitlab.io/module3-project-gamma
-    REACT_APP_API_HOST: https://mar-9-pt-chauffohapi.mod3projects.com
-    REACT_APP_USER_SERVICE_API_HOST: https://mar-9-pt-chauffohapi.mod3projects.com
 
   script:
     - cd ghi

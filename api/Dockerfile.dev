@@ -1,14 +1,32 @@
 FROM python:3.10-bullseye
 RUN python -m pip install --upgrade pip
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait /wait
-RUN chmod +x /wait
-WORKDIR /deps
-COPY requirements.txt requirements.txt
-RUN python -m pip install -r requirements.txt
 WORKDIR /app
-# CMD /wait && uvicorn main:app --reload --host 0.0.0.0
+
+# Copy the top-level files in your service's directory
+# Modify these instructions to do that
+COPY requirements.txt requirements.txt
+COPY main.py main.py
+COPY authenticator.py authenticator.py
+
+# Copy all of the subdirectories in your service's directory
+# Modify these instructions to do that
+COPY queries queries
+COPY router router
+
+RUN python -m pip install -r requirements.txt
+EXPOSE 8000
+
+ENV CORS_HOST http://localhost:3000
+ENV DATABASE_URL postgresql://user:password@postgres/chauffoh_db
+ENV SIGNING_KEY=${SIGNING_KEY}
+
+# !! PORT env var needs to match with exposed port in caprover dashboard
+CMD uvicorn main:app --host 0.0.0.0 --port 80
+
 
 # If you're using a relational database and want migrations
 # to be run automatically, delete the previous CMD line and
-# uncomment this CMD line
-CMD /wait && python -m migrations up && uvicorn main:app --reload --host 0.0.0.0
+# uncomment the following COPY and CMD lines
+COPY migrations migrations
+# # !! PORT env var needs to match with exposed port in caprover dashboard
+CMD python -m migrations up && uvicorn main:app --host 0.0.0.0 --port 80
