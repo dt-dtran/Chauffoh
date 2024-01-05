@@ -17,12 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 14
-          
-      - name: Debug Secrets
-        run: |
-          echo "DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}"
-          echo "DOCKER_HUB_PASSWORD=${{ secrets.DOCKER_HUB_PASSWORD }}"
-          
+
       - name: Login to Docker
         uses: docker/login-action@v3
         with:
@@ -42,8 +37,8 @@ jobs:
       - name: Push to Docker
         run: |
           echo "Pushing Docker images to Docker Hub"
-          docker push dtdtran/your-frontend-image:latest
-          docker push dtdtran/your-backend-image:latest
+          docker push dtdtran/chauffoh-frontend:latest
+          docker push dtdtran/chauffoh-backend:latest
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
